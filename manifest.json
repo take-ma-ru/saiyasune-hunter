@@ -1,0 +1,77 @@
+{
+  "name": "最安値ハンター - 価格比較アプリ",
+  "short_name": "最安値ハンター",
+  "description": "楽天市場、Yahoo!ショッピング、Amazonの価格を簡単に比較できるPWA",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#667eea",
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%23667eea' width='540' height='720'/><text x='270' y='100' font-size='40' font-weight='bold' fill='white' text-anchor='middle'>最安値ハンター</text><text x='270' y='150' font-size='24' fill='white' text-anchor='middle'>🔍</text><text x='270' y='250' font-size='20' fill='white' text-anchor='middle'>複数ショップの価格を簡単に比較</text></svg>",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 720'><rect fill='%23667eea' width='1280' height='720'/><text x='640' y='150' font-size='60' font-weight='bold' fill='white' text-anchor='middle'>最安値ハンター</text><text x='640' y='250' font-size='48' fill='white' text-anchor='middle'>🔍</text><text x='640' y='350' font-size='32' fill='white' text-anchor='middle'>複数ショップの価格を簡単に比較</text></svg>",
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "purpose": "any"
+    }
+  ],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23667eea;stop-opacity:1' /><stop offset='100%' style='stop-color:%23764ba2;stop-opacity:1' /></linearGradient></defs><rect fill='url(%23grad)' width='192' height='192' rx='45'/><circle cx='96' cy='70' r='28' fill='white'/><path d='M 96 105 L 75 135 L 117 135 Z' fill='white'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23667eea;stop-opacity:1' /><stop offset='100%' style='stop-color:%23764ba2;stop-opacity:1' /></linearGradient></defs><rect fill='url(%23grad)' width='512' height='512' rx='120'/><circle cx='256' cy='170' r='75' fill='white'/><path d='M 256 280 L 200 380 L 312 380 Z' fill='white'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23667eea;stop-opacity:1' /><stop offset='100%' style='stop-color:%23764ba2;stop-opacity:1' /></linearGradient></defs><rect fill='url(%23grad)' width='192' height='192' rx='45'/><circle cx='96' cy='70' r='28' fill='white'/><path d='M 96 105 L 75 135 L 117 135 Z' fill='white'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": [
+    "shopping",
+    "productivity"
+  ],
+  "shortcuts": [
+    {
+      "name": "新しい商品を追加",
+      "short_name": "商品追加",
+      "description": "価格比較対象の新しい商品を追加します",
+      "url": "/?action=add",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%23667eea' width='96' height='96' rx='20'/><text x='48' y='48' font-size='50' dominant-baseline='middle' text-anchor='middle'>➕</text></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/?action=share",
+    "method": "POST",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}

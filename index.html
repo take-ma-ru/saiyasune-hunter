@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="最安値ハンター - 複数ショッピングサイトの価格を簡単に比較できるアプリ">
+    <meta name="theme-color" content="#667eea">
+    <title>最安値ハンター🔍</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23667eea' width='192' height='192'/><text x='50%' y='50%' font-size='100' dominant-baseline='middle' text-anchor='middle'>🔍</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23667eea' width='192' height='192'/><text x='50%' y='50%' font-size='100' dominant-baseline='middle' text-anchor='middle'>🔍</text></svg>">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            padding-bottom: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px 15px;
+        }
+
+        /* Input Section */
+        .input-section {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+            animation: slideUp 0.3s ease;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        #productInput {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #e8ecf1;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        #productInput:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: #f8f9ff;
+        }
+
+        #addBtn {
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            white-space: nowrap;
+        }
+
+        #addBtn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Info Message */
+        .info-message {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #5566d2;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        /* Products Container */
+        .products-container {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        /* Product Card */
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            animation: slideIn 0.4s ease;
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            gap: 10px;
+        }
+
+        .product-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+            word-break: break-word;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .product-name:hover {
+            background: #f5f7fa;
+        }
+
+        .product-name.editing {
+            background: #e8ecf1;
+        }
+
+        .product-name input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .delete-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:active {
+            transform: scale(0.95);
+            background: #ff5252;
+        }
+
+        /* Search Links */
+        .search-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .search-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            line-height: 1.2;
+        }
+
+        .search-btn:active {
+            transform: scale(0.95);
+        }
+
+        .search-btn-icon {
+            font-size: 18px;
+        }
+
+        .rakuten-btn {
+            background: linear-gradient(135deg, #bf0000 0%, #e60000 100%);
+            box-shadow: 0 4px 12px rgba(230, 0, 0, 0.3);
+        }
+
+        .rakuten-btn:active {
+            background: linear-gradient(135deg, #a00000 0%, #cc0000 100%);
+        }
+
+        .yahoo-btn {
+            background: linear-gradient(135deg, #6f2da8 0%, #9933cc 100%);
+            box-shadow: 0 4px 12px rgba(153, 51, 204, 0.3);
+        }
+
+        .yahoo-btn:active {
+            background: linear-gradient(135deg, #5a1f8a 0%, #7a2399 100%);
+        }
+
+        .amazon-btn {
+            background: linear-gradient(135deg, #ff8800 0%, #ff9900 100%);
+            box-shadow: 0 4px 12px rgba(255, 136, 0, 0.3);
+        }
+
+        .amazon-btn:active {
+            background: linear-gradient(135deg, #e67e00 0%, #e68600 100%);
+        }
+
+        /* Price Recording Section */
+        .price-section {
+            border-top: 2px solid #f0f0f0;
+            padding-top: 14px;
+            margin-top: 14px;
+        }
+
+        .price-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .price-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .price-input-group input,
+        .price-input-group select,
+        .record-btn {
+            padding: 10px;
+            border: 1px solid #e8ecf1;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .price-input-group input:focus,
+        .price-input-group select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+
+        .price-input {
+            flex: 0 1 100px;
+        }
+
+        .shop-select {
+            flex: 1;
+            min-width: 80px;
+        }
+
+        .record-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            flex: 0 1 auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .record-btn:active {
+            transform: scale(0.95);
+            background: #5568d3;
+        }
+
+        .url-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #e8ecf1;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: monospace;
+            outline: none;
+        }
+
+        .url-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+
+        .clear-price-btn {
+            background: #f0f0f0;
+            color: #666;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .clear-price-btn:active {
+            background: #e0e0e0;
+        }
+
+        /* Price Display */
+        .price-display {
+            background: #f8f9ff;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #444;
+        }
+
+        .price-display.empty {
+            color: #999;
+            font-style: italic;
+        }
+
+        .price-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            align-items: center;
+        }
+
+        .price-value {
+            font-weight: 600;
+            color: #e60000;
+            font-size: 14px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        /* Notifications */
+        .notification-banner {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #856404;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .notification-banner.show {
+            display: block;
+        }
+
+        .notification-banner.success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+
+        .notification-banner.error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* PWA Install Instructions */
+        .install-guide {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border: 2px solid #667eea30;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #444;
+            line-height: 1.6;
+        }
+
+        .install-guide details {
+            cursor: pointer;
+        }
+
+        .install-guide summary {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+            user-select: none;
+        }
+
+        .install-guide summary:hover {
+            text-decoration: underline;
+        }
+
+        .install-guide ul {
+            list-style-position: inside;
+            margin-left: 8px;
+        }
+
+        .install-guide li {
+            margin-bottom: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .container {
+                padding: 15px 12px;
+            }
+
+            .search-links {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .search-btn {
+                padding: 10px;
+                font-size: 12px;
+            }
+
+            .product-header {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #1a1a1a;
+                color: #e0e0e0;
+            }
+
+            .input-section,
+            .product-card {
+                background: #2d2d2d;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            }
+
+            #productInput,
+            .price-input-group input,
+            .price-input-group select,
+            .url-input {
+                background: #3a3a3a;
+                border-color: #444;
+                color: #e0e0e0;
+            }
+
+            .product-name {
+                color: #e0e0e0;
+            }
+
+            .product-name:hover {
+                background: #3a3a3a;
+            }
+
+            .product-name.editing {
+                background: #444;
+            }
+
+            .price-display {
+                background: #3a3a3a;
+                color: #b0b0b0;
+            }
+
+            .info-message {
+                background: #2a3a5a;
+                color: #8fa3d4;
+                border-left-color: #667eea;
+            }
+
+            .install-guide {
+                background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+                border-color: #667eea30;
+                color: #c0c0c0;
+            }
+
+            .install-guide summary {
+                color: #8fa3d4;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>最安値ハンター🔍</h1>
+        <p>複数ショップの価格を簡単に比較</p>
+    </div>
+
+    <div class="container">
+        <div class="install-guide">
+            <details>
+                <summary>📱 PWAとしてインストールする方法</summary>
+                <ul>
+                    <li><strong>iPhone/iPad:</strong> Safariの共有ボタン → ホーム画面に追加</li>
+                    <li><strong>Android:</strong> メニュー（⋮） → ホーム画面に追加またはインストール</li>
+                    <li><strong>Chrome:</strong> アドレスバー右のインストールボタン</li>
+                </ul>
+            </details>
+        </div>
+
+        <div class="input-section">
+            <div class="info-message">
+                📝 商品名を入力して「追加」をクリック。複数サイトの価格を比較できます。
+            </div>
+            <div class="input-group">
+                <input
+                    type="text"
+                    id="productInput"
+                    placeholder="例: ワイヤレスイヤホン"
+                    autocomplete="off"
+                >
+                <button id="addBtn">追加</button>
+            </div>
+        </div>
+
+        <div id="notificationBanner" class="notification-banner"></div>
+
+        <div id="productsContainer" class="products-container">
+            <div class="empty-state">
+                <div class="empty-state-icon">📦</div>
+                <p>商品を追加してください</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const STORAGE_KEY = 'priceHunterProducts';
+        const NOTIFICATION_KEY = 'lastNotificationTime';
+        const NOTIFICATION_INTERVAL = 3 * 60 * 60 * 1000; // 3 hours
+        const CHECK_INTERVAL = 60 * 1000; // Check every minute
+
+        // Initialize Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => {
+                console.log('Service Worker registration failed:', err);
+            });
+        }
+
+        // Request notification permission on load
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // DOM Elements
+        const productInput = document.getElementById('productInput');
+        const addBtn = document.getElementById('addBtn');
+        const productsContainer = document.getElementById('productsContainer');
+        const notificationBanner = document.getElementById('notificationBanner');
+
+        // Load products from localStorage
+        function loadProducts() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        // Save products to localStorage
+        function saveProducts(products) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+        }
+
+        // Show notification banner
+        function showNotification(message, type = 'info') {
+            notificationBanner.textContent = message;
+            notificationBanner.className = `notification-banner show ${type}`;
+            setTimeout(() => {
+                notificationBanner.classList.remove('show');
+            }, 3000);
+        }
+
+        // Create product card HTML
+        function createProductCard(product, index) {
+            const priceInfo = product.prices && product.prices.length > 0
+                ? product.prices[product.prices.length - 1]
+                : null;
+
+            const priceDisplay = priceInfo
+                ? `<div class="price-line">
+                    <span>¥${parseInt(priceInfo.price).toLocaleString('ja-JP')}</span>
+                    <span>${priceInfo.shop}</span>
+                </div>
+                <div class="price-line" style="font-size: 12px; color: #999;">
+                    <span>登録日: ${new Date(priceInfo.date).toLocaleDateString('ja-JP')}</span>
+                </div>`
+                : '<span class="empty">未記録</span>';
+
+            return `
+                <div class="product-card">
+                    <div class="product-header">
+                        <div class="product-name" onclick="editProductName(${index})">
+                            ${escapeHtml(product.name)}
+                        </div>
+                        <button class="delete-btn" onclick="deleteProduct(${index})">削除</button>
+                    </div>
+
+                    <div class="search-links">
+                        <a href="https://search.rakuten.co.jp/search/mall/${encodeURIComponent(product.name)}"
+                           target="_blank" rel="noopener" class="search-btn rakuten-btn">
+                            <span class="search-btn-icon">🛍️</span>
+                            <span>楽天</span>
+                        </a>
+                        <a href="https://shopping.yahoo.co.jp/search?p=${encodeURIComponent(product.name)}"
+                           target="_blank" rel="noopener" class="search-btn yahoo-btn">
+                            <span class="search-btn-icon">🎁</span>
+                            <span>Yahoo!</span>
+                        </a>
+                        <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(product.name)}"
+                           target="_blank" rel="noopener" class="search-btn amazon-btn">
+                            <span class="search-btn-icon">📦</span>
+                            <span>Amazon</span>
+                        </a>
+                    </div>
+
+                    <div class="price-section">
+                        <div class="price-section-title">💰 最安値記録</div>
+
+                        <div class="price-input-group">
+                            <input type="number" placeholder="価格" class="price-input" id="price-${index}" min="0">
+                            <select class="shop-select" id="shop-${index}">
+                                <option value="">ショップを選択</option>
+                                <option value="楽天">楽天</option>
+                                <option value="Yahoo">Yahoo!</option>
+                                <option value="Amazon">Amazon</option>
+                                <option value="その他">その他</option>
+                            </select>
+                            <button class="record-btn" onclick="recordPrice(${index})">記録</button>
+                        </div>
+
+                        <div class="url-input-group">
+                            <input type="url" placeholder="URL（オプション）" class="url-input" id="url-${index}">
+                        </div>
+
+                        <div class="price-display ${!priceInfo ? 'empty' : ''}">
+                            ${priceDisplay}
+                            ${priceInfo ? `<button class="clear-price-btn" onclick="clearPrice(${index})">履歴を削除</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render products
+        function renderProducts() {
+            const products = loadProducts();
+
+            if (products.length === 0) {
+                productsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📦</div>
+                        <p>商品を追加してください</p>
+                    </div>
+                `;
+                return;
+            }
+
+            productsContainer.innerHTML = products.map((product, index) =>
+                createProductCard(product, index)
+            ).join('');
+        }
+
+        // Add product
+        function addProduct() {
+            const name = productInput.value.trim();
+            if (!name) {
+                showNotification('商品名を入力してください', 'error');
+                return;
+            }
+
+            const products = loadProducts();
+            products.push({
+                name: name,
+                prices: [],
+                created: new Date().toISOString()
+            });
+            saveProducts(products);
+            productInput.value = '';
+            renderProducts();
+            productInput.focus();
+            showNotification('✓ 商品を追加しました', 'success');
+        }
+
+        // Delete product
+        function deleteProduct(index) {
+            if (!confirm('この商品を削除しますか？')) return;
+            const products = loadProducts();
+            products.splice(index, 1);
+            saveProducts(products);
+            renderProducts();
+            showNotification('削除しました', 'success');
+        }
+
+        // Edit product name
+        function editProductName(index) {
+            const products = loadProducts();
+            const product = products[index];
+            const nameElement = document.querySelector(`.product-card:nth-child(${index + 1}) .product-name`);
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = product.name;
+
+            nameElement.innerHTML = '';
+            nameElement.appendChild(input);
+            nameElement.classList.add('editing');
+            input.focus();
+            input.select();
+
+            function saveEdit() {
+                const newName = input.value.trim();
+                if (newName && newName !== product.name) {
+                    product.name = newName;
+                    saveProducts(products);
+                }
+                renderProducts();
+            }
+
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') saveEdit();
+            });
+        }
+
+        // Record price
+        function recordPrice(index) {
+            const price = document.getElementById(`price-${index}`).value;
+            const shop = document.getElementById(`shop-${index}`).value;
+            const url = document.getElementById(`url-${index}`).value;
+
+            if (!price || !shop) {
+                showNotification('価格とショップを選択してください', 'error');
+                return;
+            }
+
+            const products = loadProducts();
+            const product = products[index];
+
+            product.prices = product.prices || [];
+            product.prices.push({
+                price: parseInt(price),
+                shop: shop,
+                url: url,
+                date: new Date().toISOString()
+            });
+
+            saveProducts(products);
+            renderProducts();
+            showNotification('✓ 最安値を記録しました', 'success');
+        }
+
+        // Clear price history
+        function clearPrice(index) {
+            if (!confirm('価格履歴を削除しますか？')) return;
+            const products = loadProducts();
+            products[index].prices = [];
+            saveProducts(products);
+            renderProducts();
+            showNotification('履歴を削除しました', 'success');
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Send notification
+        function sendNotification() {
+            const products = loadProducts();
+            if (products.length === 0) return;
+
+            const lastNotificationTime = localStorage.getItem(NOTIFICATION_KEY);
+            const now = Date.now();
+
+            if (lastNotificationTime && now - parseInt(lastNotificationTime) < NOTIFICATION_INTERVAL) {
+                return;
+            }
+
+            if ('Notification' in window && Notification.permission === 'granted') {
+                const title = '🔍 価格チェックの時間です！';
+                const options = {
+                    body: `登録商品数: ${products.length}個\n最安値を確認しましょう`,
+                    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect fill="%23667eea" width="192" height="192"/><text x="50%" y="50%" font-size="100" dominant-baseline="middle" text-anchor="middle">🔍</text></svg>',
+                    badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect fill="%23667eea" width="192" height="192"/><text x="50%" y="50%" font-size="100" dominant-baseline="middle" text-anchor="middle">🔍</text></svg>',
+                    tag: 'price-check',
+                    requireInteraction: false
+                };
+
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({
+                        type: 'SHOW_NOTIFICATION',
+                        title: title,
+                        options: options
+                    });
+                } else {
+                    new Notification(title, options);
+                }
+
+                localStorage.setItem(NOTIFICATION_KEY, now.toString());
+            }
+        }
+
+        // Event listeners
+        addBtn.addEventListener('click', addProduct);
+        productInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addProduct();
+        });
+
+        // Initialize
+        renderProducts();
+
+        // Check for notifications periodically
+        setInterval(sendNotification, CHECK_INTERVAL);
+        sendNotification(); // Check immediately on load
+
+        // Request notification permission on first interaction
+        document.addEventListener('click', () => {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>
